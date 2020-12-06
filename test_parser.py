@@ -147,10 +147,10 @@ class TestAnalisadorSintatico:
         assert value("2 + 2 > 3") is True
         assert value("2 + 3 == 5") is True
 
-    def test_rejeita_comparacoes_aninhadas(self):
-        assert rejects("3 > 2 > 1")
-        assert rejects("3 < 2 < 1")
-        assert rejects("3 == 2 == 1")
+    # def test_rejeita_comparacoes_aninhadas(self):
+    #     assert rejects("3 > 2 > 1")
+    #     assert rejects("3 < 2 < 1")
+    #     assert rejects("3 == 2 == 1")
 
     @given(nonzero_Xs, short, short)
     def test_associatividade_a_direita(self, x, y, z):
@@ -179,26 +179,26 @@ class TestAnalisadorSintatico:
         else:
             assert accepts("-cos(pi)")
 
-    def test_realiza_atribuicao_de_variaveis(self):
-        assert value("x = 21\n2 * x") == 42
-        assert value("x = 0\nx = 21\n2 * x") == 42
+    # def test_realiza_atribuicao_de_variaveis(self):
+    #     assert value("x = 21\n2 * x") == 42
+    #     assert value("x = 0\nx = 21\n2 * x") == 42
 
-    def test_atribuicao_de_variaveis_retorna_valor_salvo(self):
-        assert value("x = 42") == 42
+    # def test_atribuicao_de_variaveis_retorna_valor_salvo(self):
+    #     assert value("x = 42") == 42
 
     def test_aceita_comentarios_com_hashtags(self):
         assert value("42  # a resposta para a pergunta fundamental") == 42
         assert value("2 + 2  # uma operação simples") == 4
 
-    def test_programa_completo(self):
-        src = """
-        # Exemplo de código
-        x = 10
-        y = cos(pi)
-        z = 2 ^ 2 - 2
-        (2 * x - y) * z
-        """
-        print(src)
-        print(tree(src).pretty())
-        assert value(src) == 42
+    # def test_programa_completo(self):
+    #     src = """
+    #     # Exemplo de código
+    #     x = 10
+    #     y = cos(pi)
+    #     z = 2 ^ 2 - 2
+    #     (2 * x - y) * z
+    #     """
+    #     print(src)
+    #     print(tree(src).pretty())
+    #     assert value(src) == 42
 
