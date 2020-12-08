@@ -1,5 +1,5 @@
 # Identifique-se preenchendo as strings neste arquivo
-nome = "Nome Completo"
-matricula = "12/3456789"
-email = "alunx@email.com"
-usuario_github = "gituser"
+nome = "Nilo Mendonca de Brito Junior"
+matricula = "16/0037522"
+email = "nilojrmendonca@gmail.com"
+usuario_github = "nilomendonca"
