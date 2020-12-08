@@ -29,13 +29,12 @@ start  : comp?
        | atom
 
 ?atom  : NUMBER         -> number
-       | CONST          -> const
+       | NAME "(" expr ")" -> func
        | NAME           -> var
        | "(" expr ")"
 
 NAME   : /[-+]?\w+/
 NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
-CONST  : /[+-]?(acos|acosh|asin|asinh|atan|atan2|atanh|ceil|copysign|cos|cosh|degrees|erf|erfc|exp|expm1|fabs|factorial|floor|fmod|frexp|fsum|gamma|gcd|hypot|isclose|isfinite|isinf|isnan|ldexp|lgamma|log|log1p|log10|log2|modf|pow|radians|remainder|sin|sinh|sqrt|tan|tanh|trunc|pi|e|tau|inf|nan)/
 %ignore /\s+/
 %ignore /\#.*/
 """
@@ -59,6 +58,7 @@ class CalcTransformer(InlineTransformer):
         super().__init__()
         self.variables = {k: v for k, v in vars(math).items() if not k.startswith("_")}
         self.variables.update(max=max, min=min, abs=abs)
+        self.env = {}
 
     def number(self, token):
         try:
@@ -69,6 +69,19 @@ class CalcTransformer(InlineTransformer):
     def const(self, token):
         value = self.variables[token]
         return value
+
+    def var(self, token):
+        try:
+            return self.variables[token]
+        except:
+            return self.env[token]
+    
+    def func(self, name, *args):
+        name = str(name)
+        fn = self.variables[name.split('-')[-1]]
+        if name[0] == '-':
+            return -fn(*args)
+        return fn(*args)
     
     def start(self, *args):
         return args[-1]
