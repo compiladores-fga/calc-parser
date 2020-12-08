@@ -74,6 +74,17 @@ class CalcTransformer(InlineTransformer):
         else:
             return self.env[token]
     
+    def func(self, name, *args):
+        name = str(name)
+        fn = self.variables[name.split('-')[-1]]
+        if name[0] == '-':
+            return -fn(*args)
+        return fn(*args)
     
+    def assign(self, name, value):
+        self.env[name] = value
+        return self.env[name]
+    
+   
 
 test = CalcTransformer()
