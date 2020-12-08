@@ -22,6 +22,7 @@ start  : expr
 
 ?atom  : NAME -> var
        | NUMBER -> number
+       | "(" expr ")"
 
 NAME   : /[-+]?\w+/
 NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
