@@ -7,15 +7,14 @@ from lark import Lark, InlineTransformer, Token
 # o arquivo calc.py e testá-lo utilizando o pytest.
 grammar = Lark(
     r"""
-start  : expr
-       | comp
+start  : comp?
 
-?comp  : comp ">" expr  -> gt
-       | comp ">=" expr -> ge
-       | comp "<" expr  -> lt
-       | comp "<=" expr -> le
-       | comp "!=" expr -> ne
-       | comp "==" expr -> eq
+?comp  : expr ">" expr  -> gt
+       | expr ">=" expr -> ge
+       | expr "<" expr  -> lt
+       | expr "<=" expr -> le
+       | expr "!=" expr -> ne
+       | expr "==" expr -> eq
        | expr
 
 ?expr  : expr "+" term  -> add
@@ -30,17 +29,21 @@ start  : expr
        | atom
 
 ?atom  : NUMBER         -> number
+       | CONST          -> const
        | NAME           -> var
        | "(" expr ")"
 
 NAME   : /[-+]?\w+/
 NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
+CONST  : /[+-]?(acos|acosh|asin|asinh|atan|atan2|atanh|ceil|copysign|cos|cosh|degrees|erf|erfc|exp|expm1|fabs|factorial|floor|fmod|frexp|fsum|gamma|gcd|hypot|isclose|isfinite|isinf|isnan|ldexp|lgamma|log|log1p|log10|log2|modf|pow|radians|remainder|sin|sinh|sqrt|tan|tanh|trunc|pi|e|tau|inf|nan)/
 %ignore /\s+/
 %ignore /\#.*/
-""")
+"""
+)
 
 exprs = [
-    "40 > 2"
+    "pi",
+    "sin"
 ]
 
 for src in exprs:
@@ -48,7 +51,6 @@ for src in exprs:
     print(src)
     print(tree.pretty())
     print('-' * 40)
-
 
 class CalcTransformer(InlineTransformer):
     from operator import add, sub, mul, truediv as div, pow as exp, gt, ge, lt, le, ne, eq
@@ -63,6 +65,12 @@ class CalcTransformer(InlineTransformer):
             return int(token)
         except:
             return float(token)
+
+    def const(self, token):
+        value = self.variables[token]
+        return value
     
     def start(self, *args):
         return args[-1]
+
+test = CalcTransformer()
