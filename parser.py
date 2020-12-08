@@ -10,7 +10,10 @@ grammar = Lark(
 start  : atom
 
 ?atom  : NAME -> var
+       | NUMBER -> number
+
 NAME   : /[-+]?\w+/
+NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
 %ignore /\s+/
 %ignore /\#.*/
 """)
