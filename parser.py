@@ -31,7 +31,7 @@ NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
 """)
 
 exprs = [
-    "42"
+    "40 + 2"
 ]
 
 for src in exprs:
@@ -42,7 +42,7 @@ for src in exprs:
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div  # ... e mais! 
+    from operator import add, sub, mul, truediv as div, pow as exp, 
 
     def __init__(self):
         super().__init__()
