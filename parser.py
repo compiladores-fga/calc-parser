@@ -8,20 +8,29 @@ from lark import Lark, InlineTransformer, Token
 grammar = Lark(
     r"""
 start  : expr
+       | comp
 
-?expr  : expr "+" term -> add
-       | expr "-" term -> sub
+?comp  : comp ">" expr  -> gt
+       | comp ">=" expr -> ge
+       | comp "<" expr  -> lt
+       | comp "<=" expr -> le
+       | comp "!=" expr -> ne
+       | comp "==" expr -> eq
+       | expr
+
+?expr  : expr "+" term  -> add
+       | expr "-" term  -> sub
        | term
 
-?term  : term "*" pow -> mul
-       | term "/" pow -> div
+?term  : term "*" pow   -> mul
+       | term "/" pow   -> div
        | pow
 
-?pow   : atom "^" pow -> exp
+?pow   : atom "^" pow   -> exp
        | atom
 
-?atom  : NUMBER -> number
-       | NAME -> var
+?atom  : NUMBER         -> number
+       | NAME           -> var
        | "(" expr ")"
 
 NAME   : /[-+]?\w+/
@@ -31,7 +40,7 @@ NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
 """)
 
 exprs = [
-    "40 + 2"
+    "40 > 2"
 ]
 
 for src in exprs:
@@ -42,7 +51,7 @@ for src in exprs:
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div, pow as exp, 
+    from operator import add, sub, mul, truediv as div, pow as exp, gt, ge, lt, le, ne, eq
 
     def __init__(self):
         super().__init__()
