@@ -7,10 +7,26 @@ from lark import Lark, InlineTransformer, Token
 # o arquivo calc.py e testá-lo utilizando o pytest.
 grammar = Lark(
     r"""
-start : /\d+/
-""",
-    parser="lalr",
-)
+start  : atom
+
+?atom  : NAME -> var
+NAME   : /[-+]?\w+/
+%ignore /\s+/
+%ignore /\#.*/
+""")
+
+exprs = [
+    "pi",
+    "x",
+    "x0",
+    "variavel_como_nome_longo"
+]
+
+for src in exprs:
+    tree = grammar.parse(src)
+    print(src)
+    print(tree.pretty())
+    print('-' * 40)
 
 
 class CalcTransformer(InlineTransformer):
