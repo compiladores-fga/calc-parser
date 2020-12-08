@@ -56,6 +56,12 @@ class CalcTransformer(InlineTransformer):
         self.variables.update(max=max, min=min, abs=abs)
         self.env = {}
 
+    def number(self, token):
+        try:
+            return int(token)
+        except:
+            return float(token)
+
     
 
 test = CalcTransformer()
