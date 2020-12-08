@@ -8,30 +8,29 @@ from lark import Lark, InlineTransformer, Token
 grammar = Lark(r"""
 ?start : assign* comp?
 
-assign : NAME "=" comp
+?assign : NAME "=" comp
 
-?comp  : comp "==" expr -> equal
-       | comp "!=" expr -> different
-       | comp "<=" expr -> smaller_equal
-       | comp "<" expr -> smaller
-       | comp ">=" expr -> greather_equal
-       | comp ">" expr -> greather
+?comp  : expr "==" expr -> equal
+       | expr "!=" expr -> different
+       | expr "<=" expr -> smaller_equal
+       | expr "<" expr -> smaller
+       | expr ">=" expr -> greather_equal
+       | expr ">" expr -> greather
        | expr
 
 ?expr  : expr "+" term  -> add
        | expr "-" term  -> sub
        | term
 
-?term  : term "*" pow  -> mul
-       | term "/" pow  -> div
-       | pow
+?term  : term "*" exp  -> mul
+       | term "/" exp  -> div
+       | exp
 
-?pow   : atom "^" pow  -> exp
+?exp   : atom "^" exp  -> pow
        | atom
 
 ?atom  : NUMBER            -> number
        | MATH_CONST        -> math_const
-       | NAME "(" expr ")" -> fcall
        | NAME "(" expr ("," expr)* ")" -> fcall
        | NAME              -> var
        | "(" expr ")"
@@ -45,7 +44,7 @@ MATH_CONST : /[+-]?(pi|e|tau|inf|nan)/
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div  # ... e mais!
+    from operator import add, sub, mul, truediv as div, pow  # ... e mais!
 
     def __init__(self):
         super().__init__()
@@ -77,9 +76,6 @@ class CalcTransformer(InlineTransformer):
     
     def different(self, x, y):
         return x != y
-
-    def exp(self, x, y):
-        return x ** y
 
     def math_const (self, token):
         constValue = self.variables[token.split('-')[-1]]
