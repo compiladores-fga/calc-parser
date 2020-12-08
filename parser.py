@@ -28,10 +28,10 @@ start  : comp?
 ?pow   : atom "^" pow   -> exp
        | atom
 
-?atom  : NUMBER         -> number
-       | NAME "(" expr ")" -> func
+?atom  : NUMBER                        -> number
+       | NAME "(" expr ")"             -> func
        | NAME "(" expr ("," expr)* ")" -> func
-       | NAME           -> var
+       | NAME                          -> var
        | "(" expr ")"
 
 NAME   : /[-+]?\w+/
@@ -72,9 +72,11 @@ class CalcTransformer(InlineTransformer):
         return value
 
     def var(self, token):
-        try:
+        if token in self.variables:
             return self.variables[token]
-        except:
+        elif token[0] == "-" and token[1:] in self.variables:
+            return -self.variables[token[1:]]
+        else:
             return self.env[token]
     
     def func(self, name, *args):
