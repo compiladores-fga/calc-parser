@@ -7,7 +7,9 @@ from lark import Lark, InlineTransformer, Token
 # o arquivo calc.py e testá-lo utilizando o pytest.
 grammar = Lark(
     r"""
-start  : comp?
+?start  : assign* comp?
+
+?assign: NAME "=" comp
 
 ?comp  : expr ">" expr  -> gt
        | expr ">=" expr -> ge
@@ -85,6 +87,10 @@ class CalcTransformer(InlineTransformer):
         if name[0] == '-':
             return -fn(*args)
         return fn(*args)
+    
+    def assign(self, name, value):
+        self.env[name] = value
+        return self.env[name]
     
     def start(self, *args):
         return args[-1]
