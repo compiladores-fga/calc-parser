@@ -66,6 +66,14 @@ class CalcTransformer(InlineTransformer):
         value = self.variables[token]
         return value
 
+    def var(self, token):
+        if token in self.variables:
+            return self.variables[token]
+        elif token[0] == "-" and token[1:] in self.variables:
+            return -self.variables[token[1:]]
+        else:
+            return self.env[token]
+    
     
 
 test = CalcTransformer()
