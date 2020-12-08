@@ -62,6 +62,10 @@ class CalcTransformer(InlineTransformer):
         except:
             return float(token)
 
+    def const(self, token):
+        value = self.variables[token]
+        return value
+
     
 
 test = CalcTransformer()
