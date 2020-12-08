@@ -20,8 +20,8 @@ start  : expr
 ?pow   : atom "^" pow -> exp
        | atom
 
-?atom  : NAME -> var
-       | NUMBER -> number
+?atom  : NUMBER -> number
+       | NAME -> var
        | "(" expr ")"
 
 NAME   : /[-+]?\w+/
@@ -31,10 +31,7 @@ NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
 """)
 
 exprs = [
-    "pi",
-    "x",
-    "x0",
-    "variavel_como_nome_longo"
+    "42"
 ]
 
 for src in exprs:
@@ -51,3 +48,12 @@ class CalcTransformer(InlineTransformer):
         super().__init__()
         self.variables = {k: v for k, v in vars(math).items() if not k.startswith("_")}
         self.variables.update(max=max, min=min, abs=abs)
+
+    def number(self, token):
+        try:
+            return int(token)
+        except:
+            return float(token)
+    
+    def start(self, *args):
+        return args[-1]
