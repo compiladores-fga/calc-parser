@@ -30,6 +30,7 @@ start  : comp?
 
 ?atom  : NUMBER         -> number
        | NAME "(" expr ")" -> func
+       | NAME "(" expr ("," expr)* ")" -> func
        | NAME           -> var
        | "(" expr ")"
 
