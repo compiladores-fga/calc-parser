@@ -85,6 +85,7 @@ class CalcTransformer(InlineTransformer):
         self.env[name] = value
         return self.env[name]
     
-   
+    def start(self, *args):
+        return args[-1]
 
 test = CalcTransformer()
