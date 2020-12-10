@@ -11,14 +11,17 @@ r"""
 
 assign      : NAME "=" expr
 
-?expr       : expr "<" comparison                -> smaller
-            | expr ">=" comparison               -> greater_eq
-            | expr "<=" comparison               -> smaller_eq
-            | expr "==" comparison               -> eq
-            | expr "!=" comparison               -> not_eq
-            | comparison
+?expr  : expr "+" term -> sum
+       | expr "-" term -> sub
+       | term
+       | comparison
 
-?comparison : expr ">" term                 -> greater
+?comparison : mexpr ">" mexpr                 -> greater
+            | mexpr "<" mexpr                 -> smaller
+            | mexpr ">=" mexpr                -> greater_eq
+            | mexpr "<=" mexpr                -> smaller_eq
+            | mexpr "==" mexpr                -> eq
+            | mexpr "!=" mexpr                -> not_eq
             | mexpr
 
 ?mexpr      : expr "+" term                 -> sum
