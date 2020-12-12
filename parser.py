@@ -52,7 +52,7 @@ for src in exprs:
     tree = grammar.parse(src)
     print(src)
     print(tree.pretty())
-    print('-' * 40)
+    print('-' * 30)
 
 class CalcTransformer(InlineTransformer):
     from operator import add, sub, mul, truediv as div, pow as exp, gt, ge, lt, le, ne, eq
@@ -94,5 +94,3 @@ class CalcTransformer(InlineTransformer):
     
     def start(self, *args):
         return args[-1]
-
-test = CalcTransformer()
