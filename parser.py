@@ -31,7 +31,7 @@ grammar = Lark(r"""
             | atom
 
     ?atom   : NUMBER            -> number
-            | NAME "(" expr ")" -> fcall
+            | NAME "(" expr ("," expr)* ")" -> fcall
             | NAME              -> var
             | "(" expr ")"
 
@@ -77,7 +77,8 @@ class CalcTransformer(InlineTransformer):
             return self.variables[token]
         elif token[0] == "-" and token[1:] in self.variables:
             return -self.variables[token[1:]]
-        
+        else:
+            return self.variables[token]
 
     def start(self, *args):
         return args[-1]
