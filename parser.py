@@ -9,6 +9,12 @@ grammar = Lark(
     r"""
 start  : comp?
 
+?atom  : NUMBER -> number
+       | NAME "(" expr ")" -> function
+       | NAME "(" expr ("," expr)* ")" -> function
+       | NAME -> variable
+       | "(" expr ")"
+
 ?comp  : expr ">" expr  -> gt
        | expr "<" expr  -> lt
        | expr ">=" expr -> ge
@@ -28,10 +34,6 @@ start  : comp?
 ?pow   : atom "^" pow -> exp
        | atom
 
-?atom  : NUMBER -> number
-       | NAME "(" expr ")" -> func
-       | NAME -> var
-       | "(" expr ")"
 
 NAME   : /[-+]?\w+/
 NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
@@ -60,13 +62,15 @@ class CalcTransformer(InlineTransformer):
 
               return value
 
-       def var(self, token):
-              try:
+       def variable(self, token):
+              if token in self.variables:
                      return self.variables[token]
-              except:
+              elif token[0] == "-" and token[1:] in self.variables:
+                     return -(self.variables[token[1:]])
+              else:
                      return self.env[token]
 
-       def func(self, name, *args):
+       def function(self, name, *args):
               name = str(name)
               fn = self.variables[name.split('-')[-1]]
        
