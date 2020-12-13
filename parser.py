@@ -70,11 +70,12 @@ class CalcTransformer(InlineTransformer):
             return float(token)
     
     def function_call(self, name, *args):
-            name = str(name)
+        name = str(name)
         fn = self.variables[name.split('-')[-1]]
         if name[0] == '-':
             return -fn(*args)
         return fn(*args)
+        
     def var(self, token):
         if token in self.variables:
             return self.variables[token]
