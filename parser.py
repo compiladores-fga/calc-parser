@@ -8,9 +8,15 @@ from lark import Lark, InlineTransformer, Token
 grammar = Lark(
     r"""
 start  : expr
-?atom  : NUMBER -> number
-       | NAME -> var
-       | "(" expr ")"
+       | comp
+
+?comp  : comp ">" expr  -> gt
+       | comp "<" expr  -> lt
+       | comp ">=" expr -> ge
+       | comp "<=" expr -> le
+       | comp "==" expr -> eq
+       | comp "!=" expr -> ne
+       | expr
 
 ?expr  : expr "-" term -> sub
        | expr "+" term -> add
@@ -23,6 +29,10 @@ start  : expr
 ?pow   : atom "^" pow -> exp
        | atom
 
+?atom  : NUMBER -> number
+       | NAME -> var
+       | "(" expr ")"
+
 NAME   : /[-+]?\w+/
 NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
 %ignore /\s+/
@@ -31,7 +41,7 @@ NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div, pow as exp
+    from operator import add, sub, mul, truediv as div, pow as exp, gt, ge, lt, le, ne, eq
 
     def __init__(self):
         super().__init__()
