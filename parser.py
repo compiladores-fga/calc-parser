@@ -7,10 +7,12 @@ from lark import Lark, InlineTransformer, Token
 # o arquivo calc.py e testá-lo utilizando o pytest.
 grammar = Lark(
     r"""
-start : /\d+/
-""",
-    parser="lalr",
-)
+start  : atom
+?atom  : NAME -> var
+NAME   : /[-+]?\w+/
+%ignore /\s+/
+%ignore /\#.*/
+""")
 
 
 class CalcTransformer(InlineTransformer):
