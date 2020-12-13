@@ -8,8 +8,8 @@ from lark import Lark, InlineTransformer, Token
 grammar = Lark(
     r"""
 start  : expr
-?atom  : NAME -> var
-       | NUMBER -> number
+?atom  : NUMBER -> number
+       | NAME -> var
        | "(" expr ")"
 
 ?expr  : expr "-" term -> sub
@@ -31,9 +31,18 @@ NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div  # ... e mais! 
+    from operator import add, sub, mul, truediv as div, pow as exp
 
     def __init__(self):
         super().__init__()
         self.variables = {k: v for k, v in vars(math).items() if not k.startswith("_")}
         self.variables.update(max=max, min=min, abs=abs)
+
+    def number(self, token):
+        try:
+            return int(token)
+        except:
+            return float(token)
+
+    def start(self, *args):
+        return args[-1]
