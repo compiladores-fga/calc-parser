@@ -7,12 +7,14 @@ from lark import Lark, InlineTransformer, Token
 # o arquivo calc.py e testá-lo utilizando o pytest.
 grammar = Lark(
     r"""
-start  : comp?
+?start  : assign* comp?
 
-?atom  : NUMBER -> number
-       | NAME "(" expr ")" -> function
+?assign: NAME "=" comp
+
+?atom  : NUMBER                        -> number
+       | NAME "(" expr ")"             -> function
        | NAME "(" expr ("," expr)* ")" -> function
-       | NAME -> variable
+       | NAME                          -> variable
        | "(" expr ")"
 
 ?comp  : expr ">" expr  -> gt
@@ -33,7 +35,6 @@ start  : comp?
 
 ?pow   : atom "^" pow -> exp
        | atom
-
 
 NAME   : /[-+]?\w+/
 NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
@@ -78,6 +79,11 @@ class CalcTransformer(InlineTransformer):
                      return -fn(*args)
               
               return fn(*args)
+       
+       def assign(self, name, value):
+              self.env[name] = value
+              
+              return self.env[name]
 
        def start(self, *args):
               return args[-1]
