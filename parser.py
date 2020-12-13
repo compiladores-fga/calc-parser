@@ -10,6 +10,7 @@ grammar = Lark(
 start  : expr
 ?atom  : NAME -> var
        | NUMBER -> number
+       | "(" expr ")"
 
 ?expr  : expr "-" term -> sub
        | expr "+" term -> add
