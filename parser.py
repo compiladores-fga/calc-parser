@@ -7,15 +7,14 @@ from lark import Lark, InlineTransformer, Token
 # o arquivo calc.py e testá-lo utilizando o pytest.
 grammar = Lark(
     r"""
-start  : expr
-       | comp
+start  : comp?
 
-?comp  : comp ">" expr  -> gt
-       | comp "<" expr  -> lt
-       | comp ">=" expr -> ge
-       | comp "<=" expr -> le
-       | comp "==" expr -> eq
-       | comp "!=" expr -> ne
+?comp  : expr ">" expr  -> gt
+       | expr "<" expr  -> lt
+       | expr ">=" expr -> ge
+       | expr "<=" expr -> le
+       | expr "==" expr -> eq
+       | expr "!=" expr -> ne
        | expr
 
 ?expr  : expr "-" term -> sub
@@ -30,6 +29,7 @@ start  : expr
        | atom
 
 ?atom  : NUMBER -> number
+       | NAME "(" expr ")" -> func
        | NAME -> var
        | "(" expr ")"
 
@@ -41,18 +41,39 @@ NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div, pow as exp, gt, ge, lt, le, ne, eq
+       from operator import add, sub, mul, truediv as div, pow as exp, gt, ge, lt, le, ne, eq
 
-    def __init__(self):
-        super().__init__()
-        self.variables = {k: v for k, v in vars(math).items() if not k.startswith("_")}
-        self.variables.update(max=max, min=min, abs=abs)
+       def __init__(self):
+              super().__init__()
+              self.variables = {k: v for k, v in vars(math).items() if not k.startswith("_")}
+              self.variables.update(max=max, min=min, abs=abs)
+              self.env = {}
 
-    def number(self, token):
-        try:
-            return int(token)
-        except:
-            return float(token)
+       def number(self, token):
+              try:
+                     return int(token)
+              except:
+                     return float(token)
 
-    def start(self, *args):
-        return args[-1]
+       def const(self, token):
+              value = self.variables[token]
+
+              return value
+
+       def var(self, token):
+              try:
+                     return self.variables[token]
+              except:
+                     return self.env[token]
+
+       def func(self, name, *args):
+              name = str(name)
+              fn = self.variables[name.split('-')[-1]]
+       
+              if name[0] == '-':
+                     return -fn(*args)
+              
+              return fn(*args)
+
+       def start(self, *args):
+              return args[-1]
