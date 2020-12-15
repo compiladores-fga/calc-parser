@@ -2,6 +2,8 @@ import math
 from lark import Lark, InlineTransformer
 
 
+# creating lark grammar for lexical analysis
+
 grammar = Lark(
     r"""
 ?start  : assign* comp?
@@ -34,6 +36,11 @@ NUMBER : /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/
 
 
 class CalcTransformer(InlineTransformer):
+    '''
+    InlineTransformer for syntactic analysis
+    and converting everything to valid python operations
+    '''
+
     from operator import add, sub, mul, truediv as div, pow, gt, ge, lt, ne, eq, le
 
     def __init__(self):
@@ -47,12 +54,22 @@ class CalcTransformer(InlineTransformer):
         return args[-1]
 
     def number(self, token):
+        '''
+        Tries to convert number to integer
+        if conversion fails, then it's a float
+        '''
+
         try:
             return int(token)
         except BaseException:
             return float(token)
 
     def function_call(self, name, *args):
+        '''
+        Converting function calls to
+        python functions
+        '''
+
         name = str(name)
         fn = self.variables[name.split('-')[-1]]
         if name[0] == '-':
@@ -60,10 +77,19 @@ class CalcTransformer(InlineTransformer):
         return fn(*args)
 
     def assign(self, name, value):
+        '''
+        Assinging user defined variables
+        '''
+
         self.env[name] = value
         return self.env[name]
 
     def var(self, token):
+        '''
+        Recovering the value for defined
+        variables
+        '''
+
         if token in self.variables:
             return self.variables[token]
         elif token[0] == "-" and token[1:] in self.variables:
