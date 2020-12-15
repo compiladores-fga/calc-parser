@@ -1,6 +1,5 @@
-import re
 import math
-from lark import Lark, InlineTransformer, Token
+from lark import Lark, InlineTransformer
 
 
 grammar = Lark(
