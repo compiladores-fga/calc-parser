@@ -7,21 +7,21 @@ from lark import Lark, InlineTransformer, Token
 # o arquivo calc.py e testá-lo utilizando o pytest.
 grammar = Lark(
     r"""
-    start : assign* expr?
+    start : assign* comp?
 
-    ?assign: NAME "=" expr -> assign
+    ?assign: NAME "=" comp -> assign
+
+    ?comp : expr "==" expr -> eq
+        |   expr "!=" expr -> ne
+        |   expr ">" expr -> gt
+        |   expr ">=" expr -> ge
+        |   expr "<" expr -> lt
+        |   expr "<=" expr -> le
+        |   expr
 
     ?expr : expr "+" term -> add
         |   expr "-" term -> sub
-        |   comp
         |   term
-    
-    ?comp : expr "==" term -> eq
-        |   expr "!=" term -> ne
-        |   expr ">" term -> gt
-        |   expr ">=" term -> ge
-        |   expr "<" term -> lt
-        |   expr "<=" term -> le
 
     ?term : term "*" pow -> mul
         |   term "/" pow -> div
@@ -30,14 +30,16 @@ grammar = Lark(
     ?pow  : atom "^" pow -> exp
         |   atom
 
-    ?atom: NUMBER -> number
-        | NAME "(" expr ")" -> fcall
-        | NAME -> var
-        | "(" expr ")"
+    ?atom : NUMBER -> number
+        |   NAME "(" expr ")" -> fcall
+        |   NAME "(" expr ("," expr)+ ")" -> fcall
+        |   NAME -> var
+        |   "(" expr ")"
 
     NUMBER: /-?\d+(\.\d+(e[+-]?\d+)?)?/
-    NAME: /[\w_]+/
+    NAME: /[-+]?[\w_]+/
 
+    %ignore /\#[^\n]*/
     %ignore /\s+/
     """,
     parser="lalr",
@@ -48,7 +50,7 @@ class CalcTransformer(InlineTransformer):
     from operator import (
         add, sub, mul, truediv as div, pow as exp,
         eq, ne, gt, ge, lt, le
-    )  # ... e mais! 
+    )  # ... e mais!
 
     def __init__(self):
         super().__init__()
@@ -60,7 +62,6 @@ class CalcTransformer(InlineTransformer):
         return list(args)
 
     def number(self, tk):
-        print('entrou no number')
         try:
             return int(tk)
         except ValueError:
@@ -71,15 +72,30 @@ class CalcTransformer(InlineTransformer):
         return value
 
     def var(self, tk):
+        odd_op = 1
+        if tk[0] == '-':
+            odd_op = -1
+            tk = tk[1:]
+        elif tk[0] == '+':
+            tk = tk[1:]
+
         if tk in self.variables:
+            if odd_op == -1:
+                return -self.variables[tk]
+
             return self.variables[tk]
         else:
-            self.env[tk]
+            return self.env[tk]
 
-    def fcall(self, name, x):
+    def fcall(self, name, *args):
         name = str(name)
-        fn = getattr(math, name)
-        return fn(x)
+        odd_op = 1
+        if name.startswith('-'):
+            odd_op = -1
+            fn = self.variables[name[1:]]
+        else:
+            fn = self.variables[name]
+        return fn(*args) * odd_op
 
     def start(self, *args):
         return args[-1]
