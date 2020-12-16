@@ -1,0 +1,15 @@
+attrs==20.3.0
+hypothesis==5.43.3
+importlib-metadata==3.3.0
+iniconfig==1.1.1
+lark==0.11.1
+packaging==20.8
+pluggy==0.13.1
+py==1.10.0
+pyparsing==2.4.7
+pytest==6.2.1
+six==1.15.0
+sortedcontainers==2.3.0
+toml==0.10.2
+typing-extensions==3.7.4.3
+zipp==3.4.0
