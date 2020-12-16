@@ -3,8 +3,11 @@ import math
 from lark import Lark, InlineTransformer, Token
 
 
-# Implemente a gramática aqui! Você pode testar manualmente seu código executando
-# o arquivo calc.py e testá-lo utilizando o pytest.
+"""
+Implemente a gramática aqui! Você pode testar
+manualmente seu código executando o arquivo
+calc.py e testá-lo utilizando o pytest.
+"""
 grammar = Lark(r"""
     ?start : assign* comp?
 
@@ -49,7 +52,8 @@ class CalcTransformer(InlineTransformer):
 
     def __init__(self):
         super().__init__()
-        self.variables = {k: v for k, v in vars(math).items() if not k.startswith("_")}
+        self.variables = {k: v
+                    for k, v in vars(math).items() if not k.startswith("_")}
         self.variables.update(max=max, min=min, abs=abs)
 
     def number(self, token):
@@ -79,10 +83,10 @@ class CalcTransformer(InlineTransformer):
     def exp(self, x, y):
         return x ** y
 
-    def const (self, token):
+    def const(self, token):
         const = self.variables[token.split('-')[-1]]
-        #if token[0] == '-':
-        #    const *= -1
+        if token[0] == '-':
+            const *= -1
         return const
 
     def fcall(self, name, *args):
@@ -103,4 +107,4 @@ class CalcTransformer(InlineTransformer):
         return self.env[name]
 
     def start(self, *args):
-        return args[-1] 
+        return args[-1]
