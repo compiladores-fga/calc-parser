@@ -36,10 +36,10 @@ grammar = Lark(
 	| NAME "(" expr ("," expr)* ")" -> fcall
 	| "(" expr ")"
 
-NUMBER : /(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
+NUMBER : /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
 NAME : /[a-zA-Z_]\w*/
 %ignore /\s+/
-
+%ignore /\#.*/
 """,
 	parser="lalr",
 )
@@ -54,4 +54,16 @@ class CalcTransformer(InlineTransformer):
 		self.variables.update(max=max, min=min, abs=abs)
 
 	def number(self, token):
-		return float(token)
+		# exponenciação tem problemas de overflow em floats grandes
+		try:
+			return int(token)
+		except ValueError:
+			return float(token)
+	
+	def name(self, token):
+		if(token in self.variables):
+			return self.variables[token]
+		else:
+			return token
+	
+	
