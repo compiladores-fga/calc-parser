@@ -53,7 +53,8 @@ NUMBER: /-?\d+(?:\.\d+)?(?:(?:E|e)(?:\+|-)?\d+)?/
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div  # ... e mais! 
+    from operator import add, sub, mul, truediv as div  # pylint: disable=function-redefined
+
 
     def __init__(self):
         super().__init__()
@@ -113,7 +114,8 @@ class CalcTransformer(InlineTransformer):
     def start(self, *args):
         return args[-1]
 
-    def div(self, n1, n2):
+    def div(self, n1, n2):  # pylint: disable=function-redefined
+
         return  n1/n2
 
     def call(self, function, *values):
@@ -122,16 +124,3 @@ class CalcTransformer(InlineTransformer):
 
     def group(self, val):
         return val
-
-
-if __name__ == '__main__':
-    expressions = [
-        'x=21',
-        'x=21\n2*x',
-        '-pi',
-    ]
-    transformer = CalcTransformer()
-    for expression in expressions:
-        tree = grammar.parse(expression)
-        tree = transformer.transform(tree)
-        print(expression)

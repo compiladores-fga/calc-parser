@@ -3,3 +3,8 @@ parser-gabarito.py
 __pycache__
 .pytest-cache.hypothesis/
 .hypothesis/
+build/
+dist/
+.tox/
+*.egg-info/
+.python-version
