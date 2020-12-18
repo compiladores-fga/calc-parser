@@ -3,12 +3,18 @@ import math
 from lark import Lark, InlineTransformer, Token
 
 
-# Implemente a gramática aqui! Você pode testar manualmente seu código executando
-# o arquivo calc.py e testá-lo utilizando o pytest.
 grammar = Lark(r"""
-?start : assign* expr ";"?
+?start : assign* compare ?
 
-assign : NAME "=" expr ";"
+?assign : NAME "=" compare
+
+?compare    : compare ">" expr -> gt
+            | compare "<" expr -> lt
+            | compare ">=" expr -> ge
+            | compare "<=" expr -> le
+            | compare "==" expr -> eq
+            | compare "!=" expr -> ne
+            | expr
 
 ?expr  : expr "+" term  -> add
        | expr "-" term  -> sub
@@ -22,6 +28,7 @@ assign : NAME "=" expr ";"
        | atom
 
 ?atom  : NUMBER            -> number
+       | NAME "(" expr ("," expr)+ ")" -> fcall
        | NAME "(" expr ")" -> fcall
        | NAME              -> var
        | "(" expr ")"
@@ -29,11 +36,12 @@ assign : NAME "=" expr ";"
 NUMBER : /-?\d+(\.\d+([Ee][+-]?\d+)?)?/
 NAME   : /[a-zA-Z_]+[\w_]*/
 %ignore /\s+/
+%ignore /\#.*/
 """)
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div, pow as exp
+    from operator import add, sub, mul, truediv as div, pow as exp, gt, lt, ge, le, eq, ne
     def __init__(self):
         super().__init__()
         self.variables = {k: v for k, v in vars(math).items() if not k.startswith("_")}
@@ -46,59 +54,26 @@ class CalcTransformer(InlineTransformer):
         except ValueError:
             return float(token)
 
-    def fcall(self, name, x):
+    def fcall(self, name, *args):
         name = str(name)
-        fn = getattr(math, name)
-        return fn(x)
+        if name[0] == "-":
+            fn = self.variables[name[1:]]
+            return -fn(*args)
+        
+        fn = self.variables[name]
+        return fn(*args)
 
     def assign(self, name, value):
         self.env[name] = value
+        return value 
 
     def var(self, name):
-        return self.env[name]
+        if name[0] == "-" and name[1:] in self.variables:
+            return -self.variables[name [1:]]
+        elif name in self.variables:
+            return self.variables[name]
+        else:
+            return self.env[name]
 
     def start(self, *args):
         return args[-1]
-
-
-transformer = CalcTransformer()
-
-
-"""exprs = [
-    "42",
-    "3.14",
-    "-10",
-    "40 + 2",
-    "21 * 2",
-    "80 - 38",
-    "84 / 2",
-    "1 + 1 + 1",
-    "1 + 1 - 1",
-    "2 * 2 * 2 / 8",
-    "20 * 2 + 2",
-    "2 + 20 * 2",
-    "32 / 4 / 2",
-    "10 - 2 - 3",
-    "(2 + 20) * 2",
-    "(2 + (10 + 10) / 4) * 2",
-    "3**2",
-    "2 * 3**2",
-    "3**2**3",
-    "1 ^ 2 + 3", # => 0b01 ^ 0b10 = 0b11 = 6
-    "3 + 2 ^ 1", # => 6
-    "1 | 2 & 3", # => 0b01 | (0b10 & 0b11) = 0b11 = 3
-    "1 ^ 2 & 3", # => 0b01 ^ (0b10 & 0b11) = 0b11 = 3
-    "x = 20 + 20; y = 2; x + y",
-]
-
-
-for src in exprs:
-    print(src)
-    
-    tree = grammar.parse(src)
-    print(tree.pretty())
-    
-    result = transformer.transform(tree)
-    print(result)
-    
-    print('-' * 40)"""
