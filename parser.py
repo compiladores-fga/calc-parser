@@ -29,7 +29,7 @@ grammar = Lark(r"""
     lt : number "<" number
     ne : number "!=" number
 
-    comparison : eq | ge | le | gt | lt | ne
+    ?comparison : eq | ge | le | gt | lt | ne
 
     %import common.WS
     %ignore WS
@@ -38,7 +38,7 @@ grammar = Lark(r"""
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div, pow
+    from operator import add, sub, mul, truediv as div, pow, eq, ge, le, lt, gt, ne
 
     def __init__(self):
         super().__init__()
@@ -50,7 +50,7 @@ class CalcTransformer(InlineTransformer):
 
 
 if __name__ == "__main__":
-    tree = grammar.parse("0 - 1 - 1")
+    tree = grammar.parse("1 == 1")
     print(tree.pretty())
     parsed = CalcTransformer().transform(tree)
     print(parsed)
