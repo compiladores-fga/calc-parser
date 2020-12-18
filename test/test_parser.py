@@ -22,7 +22,7 @@ class Error(str):
 @lru_cache(1)
 def mod():
     ns: Dict[str, Any] = {"__name__": "parser"}
-    exec(open("parser.py").read(), ns)
+    exec(open("calc/parser.py").read(), ns)
     try:
         grammar = ns["grammar"]
     except KeyError:

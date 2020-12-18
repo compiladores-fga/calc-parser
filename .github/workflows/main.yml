@@ -1,0 +1,30 @@
+on: [push]
+
+jobs:
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    name: 'Static Analysis'
+    steps:
+
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+
+      - name: Python Pylin GitHub Action
+        uses: fylein/python-pylint-github-action@v1
+        with:
+          args: pip3 install -r requirements.txt && pylint calc/*.py -E -d E1101
+
+  running-tests:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+
+
+      - name: Pytest
+        run: |
+          docker build -t pytest -f docker/pytest/Dockerfile .
+          docker run -v $(pwd):/home pytest
+
