@@ -8,12 +8,12 @@ grammar = Lark(r"""
 
 ?assign : NAME "=" compare
 
-?compare    : compare ">" expr -> gt
-            | compare "<" expr -> lt
-            | compare ">=" expr -> ge
-            | compare "<=" expr -> le
-            | compare "==" expr -> eq
-            | compare "!=" expr -> ne
+?compare    : expr ">" expr -> gt
+            | expr "<" expr -> lt
+            | expr ">=" expr -> ge
+            | expr "<=" expr -> le
+            | expr "==" expr -> eq
+            | expr "!=" expr -> ne
             | expr
 
 ?expr  : expr "+" term  -> add
@@ -34,7 +34,7 @@ grammar = Lark(r"""
        | "(" expr ")"
 
 NUMBER : /-?\d+(\.\d+([Ee][+-]?\d+)?)?/
-NAME   : /[a-zA-Z_]+[\w_]*/
+NAME   : /[+-]?[a-zA-Z_]+[\w_]*/
 %ignore /\s+/
 %ignore /\#.*/
 """)
