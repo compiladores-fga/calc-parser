@@ -3,3 +3,5 @@ parser-gabarito.py
 __pycache__
 .pytest-cache.hypothesis/
 .hypothesis/
+# Vim swap files
+*.swp
