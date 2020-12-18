@@ -26,14 +26,14 @@ assign : NAME "=" expr ";"
        | NAME              -> var
        | "(" expr ")"
 
-NUMBER : /\d+(\.?\d*[Ee]?[+-]?\d*)?/
-NAME   : /[\w_]+/
+NUMBER : /-?\d+(\.\d+([Ee][+-]?\d+)?)?/
+NAME   : /[a-zA-Z_]+[\w_]*/
 %ignore /\s+/
 """)
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div, pow
+    from operator import add, sub, mul, truediv as div, pow as exp
     def __init__(self):
         super().__init__()
         self.variables = {k: v for k, v in vars(math).items() if not k.startswith("_")}
