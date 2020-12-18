@@ -1,6 +1,7 @@
 # Atenção! Este arquivo não será avaliado!!!
 #
-# O arquivo calc.py importa o conteúdo do módulo parser e fornece scripts úteis para testar o
+# O arquivo calc.py importa o conteúdo do módulo parser
+# e fornece scripts úteis para testar o
 # analisador sintático interativamente a partir da linha de comando.
 #
 import parser
@@ -9,7 +10,10 @@ import parser
 def repl():
     print("CALCULADORA++")
     print("Digite comandos no prompt. O comando quit encerra a sessão.\n")
-    print('O comando "debug" mostra ou oculta as árvores sintáticas intermediárias')
+    print(
+        'O comando "debug" mostra ou oculta as '
+        'árvores sintáticas intermediárias'
+    )
 
     env = parser.CalcTransformer()
     tree = None

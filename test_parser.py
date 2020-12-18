@@ -1,10 +1,9 @@
-import pytest
 import math
 from typing import Dict, Any, Union
 from lark import Lark
 from functools import lru_cache
 from hypothesis import given
-from hypothesis.strategies import floats, integers, one_of
+from hypothesis.strategies import integers, one_of
 
 
 Xs = integers(-1_000, 1_000)
@@ -36,7 +35,9 @@ def mod():
     try:
         transformer_class = ns["CalcTransformer"]
     except KeyError:
-        raise ValueError("não definiu a classe CalcTransformer no módulo parser.py")
+        raise ValueError(
+            "não definiu a classe CalcTransformer no módulo parser.py"
+        )
 
     return grammar, transformer_class
 
@@ -121,7 +122,7 @@ class TestAnalisadorSintatico:
         assert value(f"{x} + {y} / {z}") == x + y / z
         assert value(f"{x} - {y} * {z}") == x - y * z
         assert value(f"{x} * {y} + {z}") == x * y + z
-        
+
         if y > 0 or x != 0:
             assert value(f"{x} ^ {y} + {z}") == x ** y + z
             assert value(f"{x} ^ {y} * {z}") == x ** y * z
@@ -154,13 +155,13 @@ class TestAnalisadorSintatico:
 
     @given(nonzero_Xs, short, short)
     def test_associatividade_a_direita(self, x, y, z):
-        if y != 0 or z > 0: 
+        if y != 0 or z > 0:
             assert value(f"{x} ^ {y} ^ {z}") == x ** (y ** z)
 
     def test_calcula_valores_de_variaveis_padrao(self):
-        assert value("pi") == math.pi 
+        assert value("pi") == math.pi
         assert callable(value("sin"))
-        
+
     def test_chamada_de_funcao_simples(self):
         assert value("cos(pi)") == -1
         assert value("abs(-2)") == 2

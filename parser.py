@@ -1,63 +1,63 @@
-import re
 import math
-from lark import Lark, InlineTransformer, Token
+from lark import Lark, InlineTransformer
 
 
-# Implemente a gramática aqui! Você pode testar manualmente seu código executando
+# Implemente a gramática aqui! Você pode
+# testar manualmente seu código executando
 # o arquivo calc.py e testá-lo utilizando o pytest.
 grammar = Lark(
-r"""
-?start      : assign* expr?
+    r"""
+    ?start      : assign* expr?
 
-assign      : NAME "=" expr
+    assign      : NAME "=" expr
 
-?expr  : expr "+" term -> sum
-       | expr "-" term -> sub
-       | term
-       | comparison
+    ?expr  : expr "+" term -> sum
+        | expr "-" term -> sub
+        | term
+        | comparison
 
-?comparison : mexpr ">" mexpr                 -> greater
-            | mexpr "<" mexpr                 -> smaller
-            | mexpr ">=" mexpr                -> greater_eq
-            | mexpr "<=" mexpr                -> smaller_eq
-            | mexpr "==" mexpr                -> eq
-            | mexpr "!=" mexpr                -> not_eq
-            | mexpr
+    ?comparison : mexpr ">" mexpr                 -> greater
+                | mexpr "<" mexpr                 -> smaller
+                | mexpr ">=" mexpr                -> greater_eq
+                | mexpr "<=" mexpr                -> smaller_eq
+                | mexpr "==" mexpr                -> eq
+                | mexpr "!=" mexpr                -> not_eq
+                | mexpr
 
-?mexpr      : expr "+" term                 -> sum
-            | expr "-" term                 -> sub
-            | term
+    ?mexpr      : expr "+" term                 -> sum
+                | expr "-" term                 -> sub
+                | term
 
-?term       : term "*" pow                  -> mul
-            | term "/" pow                  -> div
-            | pow
+    ?term       : term "*" pow                  -> mul
+                | term "/" pow                  -> div
+                | pow
 
-?pow        : atom "^" pow                 -> exp
-            | atom
+    ?pow        : atom "^" pow                 -> exp
+                | atom
 
-?atom       : NUMBER                        -> number
-            | CONST                         -> const
-            | NAME "(" expr ")"             -> fcall
-            | NAME "(" expr ("," expr)* ")" -> fcall
-            | NAME                          -> var
-            | "(" expr ")"
+    ?atom       : NUMBER                        -> number
+                | CONST                         -> const
+                | NAME "(" expr ")"             -> fcall
+                | NAME "(" expr ("," expr)* ")" -> fcall
+                | NAME                          -> var
+                | "(" expr ")"
 
-NUMBER      : /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
-NAME        : /-?\w+/
-CONST       : /-?(pi|e|tau|inf|nan)/
+    NUMBER      : /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
+    NAME        : /-?\w+/
+    CONST       : /-?(pi|e|tau|inf|nan)/
 
-%ignore /\s+/
-%ignore /\#[^\n]*/
-"""
+    %ignore /\s+/
+    %ignore /\#[^\n]*/
+    """
 )
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div  # ... e mais! 
-
     def __init__(self):
         super().__init__()
-        self.variables = {k: v for k, v in vars(math).items() if not k.startswith("_")}
+        self.variables = {
+            k: v for k, v in vars(math).items() if not k.startswith("_")
+        }
         self.variables.update(max=max, min=min, abs=abs)
         self.env = {}
 
@@ -66,19 +66,19 @@ class CalcTransformer(InlineTransformer):
             return int(token)
         except ValueError:
             return float(token)
-    
+
     def sum(self, x, y):
         return x + y
 
     def sub(self, x, y):
         return x - y
-    
+
     def mul(self, x, y):
         return x * y
-    
+
     def div(self, x, y):
         return x / y
-    
+
     def exp(self, x, y):
         return x ** y
 
@@ -120,10 +120,16 @@ class CalcTransformer(InlineTransformer):
         return self.env[name]
 
     def const(self, name):
-        return -self.variables[name.split('-')[1]] if name.startswith('-')  else self.variables[name]
+        return (
+            -self.variables[name.split('-')[1]] if name.startswith('-')
+            else self.variables[name]
+        )
 
     def var(self, name):
-        return self.variables[name] if name in self.variables else self.env[name]
+        return (
+            self.variables[name] if name in self.variables
+            else self.env[name]
+        )
 
     def start(self, *args):
         return args[-1]

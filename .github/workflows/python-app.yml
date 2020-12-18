@@ -27,3 +27,5 @@ jobs:
       run: pytest $TEST_FILE
       env:
         TEST_FILE: test_parser.py
+    - name:  Run linter
+      run: flake8 calc.py test_parser.py parser.py
