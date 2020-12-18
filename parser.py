@@ -4,14 +4,19 @@ import math
 from lark import Lark, InlineTransformer
 
 grammar = Lark(r"""
-    ?value: expression | comparison | function | name
+    ?value : assignment* start?
+    ?start : expression | comparison
 
-    name : /\-?[a-zA-Z_]\w*/
+    NAME : /\-?[a-zA-Z_]\w*/
     number : /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
 
-    ?function_body : name | expression [("," expression)*]
+    ?function_body : expression [("," expression)*]
 
-    function : name "(" function_body ")"
+    name: NAME
+
+    ?function : NAME "(" function_body ")" | name
+
+    ?assignment : NAME "=" expression
 
     add : expression "+" priority2
     sub : expression "-" priority2
@@ -25,7 +30,7 @@ grammar = Lark(r"""
 
     ?expression : priority3 | priority2
 
-    ?expression_item : number | "(" expression ")"
+    ?expression_item : number | "(" expression ")" | function
 
     eq : expression "==" number
     ge : expression ">=" number
@@ -38,6 +43,7 @@ grammar = Lark(r"""
 
     %import common.WS
     %ignore WS
+    %ignore /#.*/
 
 """, start="value", parser="lalr")
 
@@ -51,7 +57,6 @@ class CalcTransformer(InlineTransformer):
         self.variables.update(max=max, min=min, abs=abs)
 
     def number(self, n):
-        # Peguei essa dica com um brother.
         try:
             return int(n)
         except ValueError:
@@ -78,23 +83,37 @@ class CalcTransformer(InlineTransformer):
         return n
 
     def function(self, *args):
-        func = args[0]
+        func = args[0].value
         mul = 1
 
-        if type(func) is tuple:
-            func = func[1]
+        if func[0] == "-":
+            func = func[1:]
             mul = -1
-        try:
-            tree = args[1]
-            children = tree.children
-        except AttributeError:
+
+        if func in self.variables:
+            func = self.variables[func]
+            try:
+                values = args[1].children
+                return func(values) * mul
+            except AttributeError:
+                return func(args[1]) * mul
             return func(args[1]) * mul
 
-        return func(children) * mul
+        return args
+
+    def assignment(self, *args):
+        print("arg0", args[0])
+        print("arg1", args[1])
+        self.variables[args[0]] = args[1]
+        return args[1]
+
+    def value(self, *args):
+        return args[-1]
 
 
 if __name__ == "__main__":
-    tree = grammar.parse("-pi")
+    # tree = grammar.parse("x = 0\nx = 21\n2 * x")
+    tree = grammar.parse("cos(pi)")
     print(tree.pretty())
     parsed = CalcTransformer().transform(tree)
     print(parsed)
