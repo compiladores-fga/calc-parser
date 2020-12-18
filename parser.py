@@ -9,25 +9,26 @@ grammar = Lark(r"""
     name : /[a-zA-Z]\w*/
     number : /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
 
-    add : expression "+" priority1
-    sub : expression "-" priority1
-    mul : priority1 "*" expression_item
-    div : priority1 "/" expression_item
-    pow: priority1 "^" expression_item
+    add : expression "+" priority2
+    sub : expression "-" priority2
+    mul : priority2 "*" priority1
+    div : priority2 "/" priority1
+    pow : expression_item "^" priority1
 
-    ?priority1 : mul | div | pow | expression_item
-    ?priority2 : add | sub
+    ?priority1 : pow | expression_item
+    ?priority2 : mul | div | priority1
+    ?priority3 : add | sub
 
-    ?expression : priority2 | priority1
+    ?expression : priority3 | priority2
 
     ?expression_item : number | "(" expression ")"
 
-    eq : number "==" number
-    ge : number ">=" number
-    le : number "<=" number
-    gt : number ">" number
-    lt : number "<" number
-    ne : number "!=" number
+    eq : expression "==" number
+    ge : expression ">=" number
+    le : expression "<=" number
+    gt : expression ">" number
+    lt : expression "<" number
+    ne : expression "!=" number
 
     ?comparison : eq | ge | le | gt | lt | ne
 
@@ -46,11 +47,15 @@ class CalcTransformer(InlineTransformer):
         self.variables.update(max=max, min=min, abs=abs)
 
     def number(self, n):
-        return float(n)
+        # Peguei essa dica com um brother.
+        try:
+            return int(n)
+        except ValueError:
+            return float(n)
 
 
 if __name__ == "__main__":
-    tree = grammar.parse("1 == 1")
+    tree = grammar.parse("595 ^ 5 * 121")
     print(tree.pretty())
     parsed = CalcTransformer().transform(tree)
     print(parsed)
