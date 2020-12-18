@@ -4,10 +4,14 @@ import math
 from lark import Lark, InlineTransformer
 
 grammar = Lark(r"""
-    ?value: expression | name | comparison
+    ?value: expression | comparison | function | name
 
-    name : /[a-zA-Z]\w*/
+    name : /\-?[a-zA-Z_]\w*/
     number : /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
+
+    ?function_body : name | expression [("," expression)*]
+
+    function : name "(" function_body ")"
 
     add : expression "+" priority2
     sub : expression "-" priority2
@@ -53,9 +57,44 @@ class CalcTransformer(InlineTransformer):
         except ValueError:
             return float(n)
 
+    def name(self, n):
+        negative = False
+
+        if n[0] == "-":
+            n = n[1:]
+            negative = True
+
+        if n in self.variables:
+            var = self.variables[n]
+
+            if negative:
+                try:
+                    return var * -1
+                except TypeError:
+                    return ("-", var)
+            else:
+                return var
+
+        return n
+
+    def function(self, *args):
+        func = args[0]
+        mul = 1
+
+        if type(func) is tuple:
+            func = func[1]
+            mul = -1
+        try:
+            tree = args[1]
+            children = tree.children
+        except AttributeError:
+            return func(args[1]) * mul
+
+        return func(children) * mul
+
 
 if __name__ == "__main__":
-    tree = grammar.parse("595 ^ 5 * 121")
+    tree = grammar.parse("-pi")
     print(tree.pretty())
     parsed = CalcTransformer().transform(tree)
     print(parsed)
