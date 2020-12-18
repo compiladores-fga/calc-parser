@@ -4,13 +4,13 @@ import math
 from lark import Lark, InlineTransformer
 
 grammar = Lark(r"""
-    ?value: expression | name
+    ?value: expression | name | comparison
 
     name : /[a-zA-Z]\w*/
-    number : /(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
+    number : /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
 
-    add : priority1 "+" expression
-    sub : priority1 "-" expression
+    add : expression "+" priority1
+    sub : expression "-" priority1
     mul : priority1 "*" expression_item
     div : priority1 "/" expression_item
     pow: priority1 "^" expression_item
@@ -21,6 +21,15 @@ grammar = Lark(r"""
     ?expression : priority2 | priority1
 
     ?expression_item : number | "(" expression ")"
+
+    eq : number "==" number
+    ge : number ">=" number
+    le : number "<=" number
+    gt : number ">" number
+    lt : number "<" number
+    ne : number "!=" number
+
+    comparison : eq | ge | le | gt | lt | ne
 
     %import common.WS
     %ignore WS
@@ -41,7 +50,7 @@ class CalcTransformer(InlineTransformer):
 
 
 if __name__ == "__main__":
-    tree = grammar.parse("2 * (2 + 1) + 1")
+    tree = grammar.parse("0 - 1 - 1")
     print(tree.pretty())
     parsed = CalcTransformer().transform(tree)
     print(parsed)
