@@ -4,25 +4,23 @@ import math
 from lark import Lark, InlineTransformer
 
 grammar = Lark(r"""
-    ?value: name
-          | number
-          | expression
+    ?value: expression | name
 
     name : /[a-zA-Z]\w*/
     number : /(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
 
-    operator : "+"
-             | "-"
-             | "/"
-             | "*"
-             | "^"
+    add : priority1 "+" expression
+    sub : priority1 "-" expression
+    mul : priority1 "*" expression_item
+    div : priority1 "/" expression_item
+    pow: priority1 "^" expression_item
 
-    expression : simple_expression | composite_expression
+    ?priority1 : mul | div | pow | expression_item
+    ?priority2 : add | sub
 
-    expression_item : number | composite_expression
+    ?expression : priority2 | priority1
 
-    simple_expression : expression_item operator expression_item [(operator expression_item)*]
-    composite_expression: "(" simple_expression ")"
+    ?expression_item : number | "(" expression ")"
 
     %import common.WS
     %ignore WS
@@ -31,14 +29,19 @@ grammar = Lark(r"""
 
 
 class CalcTransformer(InlineTransformer):
-    from operator import add, sub, mul, truediv as div  # ... e mais!
+    from operator import add, sub, mul, truediv as div, pow
 
     def __init__(self):
         super().__init__()
         self.variables = {k: v for k, v in vars(math).items() if not k.startswith("_")}
         self.variables.update(max=max, min=min, abs=abs)
 
+    def number(self, n):
+        return float(n)
+
 
 if __name__ == "__main__":
-    tree = grammar.parse("ti")
-    print(tree)
+    tree = grammar.parse("2 * (2 + 1) + 1")
+    print(tree.pretty())
+    parsed = CalcTransformer().transform(tree)
+    print(parsed)
