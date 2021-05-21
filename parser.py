@@ -62,7 +62,8 @@ class CalcTransformer(InlineTransformer):
         except KeyError:
             return "Invalid: " + str(token)
 
-    def fcall(self, name, *args):
+    def func(self, name, *args):
+        name = str(name)
         fn = self.variables[name.split('-')[-1]]
         try:
             if name[0] == '-':
@@ -75,7 +76,7 @@ class CalcTransformer(InlineTransformer):
 
     def assign(self, name, value):
         self.vars[name] = value
-        print("ASSIGN", self.vars[name])
+        print("###", self.vars[name])
         return self.vars[name]
 
     def start(self, *args):
